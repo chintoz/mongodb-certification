@@ -12,3 +12,6 @@
 <li class="masthead__menu-item">
     <a href="/mongodb-certification/unit4.html">Unit 4 - MongoDB Data Modeling Intro</a>
 </li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit5.html">Unit 5 - Connecting to a MongoDB database</a>
+</li>
