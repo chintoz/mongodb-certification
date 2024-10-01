@@ -1,3 +1,8 @@
 # MongoDB Certification Resources
 
-TBC
+<li class="masthead__menu-item">
+    <a href="https://chintoz.github.io/mongodb-certification/unit1.html">Unit 1 - Start Here - Intro to MongoDB</a>
+</li>
+<li class="masthead__menu-item">
+    <a href="https://chintoz.github.io/mongodb-certification/unit2.html">Unit 2 - Getting started with MongoDB Atlas</a>
+</li>
