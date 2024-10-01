@@ -9,3 +9,6 @@
 <li class="masthead__menu-item">
     <a href="/mongodb-certification/unit3.html">Unit 3 - MongoDB and the Document Model</a>
 </li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit4.html">Unit 4 - MongoDB Data Modeling Intro</a>
+</li>
