@@ -38,3 +38,37 @@ They said “Mongo Atlas is a comprehensive developer data platform” because t
 After quiz there was a statement which I failed:
 
 * What can we do with MongoDB Atlas? Write and host a full application in a managed cloud environment (reason: Application Services are cloud services that simplify building applications with Atlas).
+
+## Lesson 2 - Creating and deploying at Atlas Cluster
+
+Organizations allow you to define group and define users and teams. We can use it to grant access to projects.
+Projects define and organize resources like database clusters. Usual configuration is creating separate projects for development, testing and production environments.
+
+To turn on backup of the cluster, it’s only available for M2 and above.
+
+By default, mongo cluster is created without any user and without any IP address to allow access. First step will be create an administrative user. It could be created using username/password or it could be created with a certificate as credentials.
+
+By default, mongodb blocks access from all IPs addresses except for Atlas itself. In order to access from another IP, it should be configured by the section to configure allowed IPs.
+
+There is a mechanism to populate the database with a sample dataset.
+
+Lab:
+
+Command to create the cluster from command line:
+
+```bash
+atlas setup --clusterName myAtlasClusterEDU --provider AWS --currentIp --skipSampleData --username xxxxxx --password xxxxx | tee atlas_cluster_details.txt
+```
+
+Command to load dataset in the cluster:
+```bash
+atlas clusters sampleData load myAtlasClusterEDU
+```
+
+Quiz:
+
+The default project created in Mongo Atlas is called Project0
+
+First data cluster is created empty, therefore size is 0.
+
+
