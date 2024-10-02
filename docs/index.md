@@ -15,3 +15,15 @@
 <li class="masthead__menu-item">
     <a href="/mongodb-certification/unit5.html">Unit 5 - Connecting to a MongoDB database</a>
 </li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit6.html">Unit 6 - Connecting to MongoDB in Java</a>
+</li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit7.html">Unit 7 - MongoDB CRUD Operations: Insert and Find Documents</a>
+</li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit8.html">Unit 8 - MongoDB CRUD Operations: Replace and Delete Documents</a>
+</li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit9.html">Unit 9 - MongoDB CRUD Operations: Modifying Query Results</a>
+</li>
