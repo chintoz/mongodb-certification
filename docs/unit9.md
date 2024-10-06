@@ -37,4 +37,30 @@ Limiting the number of documents returned by the query is a good practice. It re
 
 ## Lesson 2: Returning Specific Data from a Query in MongoDB
 
+By default, mongodb return all fields in the documents. It’s possible to project a subset of fields. Projection basic structure is:
+
+```mongodb-json
+db.inspections.findOne({"sector": "Restaurant - 818"}, {"business_name": 1, "result": 1})
+```
+
+This will improve the performance of the query. It’s going to reduce the amount of data transferred between the database and the application. It’s going to reduce the amount of memory used by the application.
+
+Even when we project some fields, by default the _id field is going to be returned. If we don’t want to return it, we have to explicitly exclude it.
+
+```mongodb-json
+db.inspections.findOne({"sector": "Restaurant - 818"}, {"business_name": 1, "result": 1, "_id": 0})
+```
+
+Inclusion and exclusion statements can’t be mixed in the same projection. If we want to include and exclude fields, we have to do it in two different projections. _id field is the only field that can be excluded. We can choose include or exclude fields, but not both.
+
+Now we are going to show an example of exclusion:
+
+```mongodb-json 
+db.inspections.findOne({"result": {$in: ["Pass", "Warning"]}}, {"date": 0, "address.zip": 0})
+```
+
+At the time of defining fields, if the field is nested, we have to use the dot notation. In the previous example, the field address is nested in the document. In the previous example date field won't need quotes, but address.zip will need it.
+
+## Lesson 3: Counting Documents in a MongoDB Collection
+
 TBC
