@@ -63,4 +63,28 @@ At the time of defining fields, if the field is nested, we have to use the dot n
 
 ## Lesson 3: Counting Documents in a MongoDB Collection
 
-TBC
+In this lesson, we are going to show how to count documents in a collection. The basic structure is:
+
+```mongodb-json
+db.collectionName.countDocuments(<query>, {<options>})
+```
+
+The first parameter is the query. It’s optional. If we don’t provide it, it’s going to count all documents in the collection. The second parameter is the options. It’s optional. It allows to specify the limit of documents to be counted. The options document is rarely used.
+
+Here an example counting  documents in a collection:
+
+```mongodb-json
+db.trips.countDocuments()
+```
+
+In the following example, it's going to count the documents which trip duration is bigger than 120 and user type is subscriber:
+
+```mongodb-json
+db.trips.countDocuments({"tripduration": {$gt: 120}, "usertype": "Subscriber"})
+```
+
+Here an example in a lab. In the following example is going to query the amount of items in the collection which name is laptop and price is less than 600:
+
+```mongodb-json
+db.sales.countDocuments({ items: { $elemMatch: { name: "laptop", price: { $lt: 600 } } } } )
+```

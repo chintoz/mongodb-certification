@@ -27,3 +27,6 @@
 <li class="masthead__menu-item">
     <a href="/mongodb-certification/unit9.html">Unit 9 - MongoDB CRUD Operations: Modifying Query Results</a>
 </li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit10.html">Unit 10 - MongoDB CRUD Operations in Java</a>
+</li>
