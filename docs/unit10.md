@@ -297,4 +297,66 @@ public static void main(String[] args) {
 
 ## Lesson 6: Creating MongoDB Transactions in Java Applications
 
-TBC
+A multi-document transaction is an operation that requires atomicity of reads and/or writes to multiple documents. A transaction is a sequence of database operations that represent a single unit of work. A transaction is an all-or-nothing operation. It means that if one operation fails, the entire transaction fails. It's going to roll back all the operations. It's going to ensure the data integrity.
+
+On commited all the operations performed under the protection of the transaction are saved. If the transaction is cancelled or doesn't complete, all write operations performed are discarded. It's going to roll back all the operations.
+
+Operations within a transaction success of fail together. This property is called atomicity. It's going to ensure the data integrity. It's going to ensure the data consistency.
+
+ACID transactions are defined by: Atomicity, Consistency, Isolation, Durability. Atomicity means that all the operations in the transaction are performed or none of them are. Consistency means that the data is in a consistent state before and after the transaction. Isolation means that the transaction is isolated from other transactions. Durability means that the data is saved and won't be lost.
+
+Transaction steps:
+
+1. Start a client session.
+2. Define transaction options (optional).
+3. Define the sequence of operations to be performed inside the transaction.
+4. Start the transaction by using ClientSession's `withTransaction()` method.
+5. Release the resources used by the transaction.
+
+Remember:
+1. There's 60 seconds timeout for a transaction.
+2. Close any resources used by the transaction.
+
+In the following example we are going to transfer money between two accounts. The transaction is going to be performed in the bank database:
+
+```java
+public static void main(String[] args) {
+
+    String mongoConnectionString = "mongodb://localhost:27017";
+    final MongoClient mongoClient = MongoClients.create(mongoConnectionString);
+    final ClientSession clientSession = mongoClient.startSession();
+    
+    TransactionBody txnBody = new TransactionBody<String>() {
+        @Override
+        public void execute() {
+            MongoCollection<Document> bankingCollection = clientSession.getDatabase("bank").getCollection("accounts");
+            
+            Bson fromAccount = Filters.eq("account_id", "MDB1001");
+            Bson withdrawal = Updates.inc("balance", -1000.00);
+            
+            Bson toAccount = Filters.eq("account_id", "MDB1002");
+            Bson deposit = Updates.inc("balance", 1000.00);
+
+            System.out.println("This is from account " + fromAccount.toBsonDocument().toJson() + " withdrawal " + withdrawal.toBsonDocument().toJson());
+            System.out.println("This is to account " + toAccount.toBsonDocument().toJson() + " deposit " + deposit.toBsonDocument().toJson());
+            
+            bankingCollection.updateOne(clientSession, fromAccount, withdrawal);
+            bankingCollection.updateOne(clientSession, toAccount, deposit);
+            
+            return "Transferred funds";
+            
+        }
+    };
+    
+    try {
+        clientSession.withTransaction(txnBody);
+    } catch (MongoException e) {
+        System.out.println("Error in transaction: " + e.getMessage());
+    } finally {
+        clientSession.close();
+    }
+}
+```
+
+In case of the process encounter an error, transaction is going to be cancelled. If everything goes well transaction is going to be commited.
+
