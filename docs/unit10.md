@@ -155,4 +155,76 @@ All query should provide filters to prevent retrieving all the document from a c
 
 ## Lesson 4: Updating Documents in Java Applications
 
+For updating documents we have a couple of method for this purpose. The `updateOne()` method is used to update a single document in a collection. The `updateMany()` method is used to update multiple documents in a collection. 
+
+Regarding the operation to be executed we have two possibilities, update the value of an existing field or add a new field to the document.
+
+`updateOne()` method is used to update a single document in a collection when it matches a specific criteria.This method accepts a query filter, and an update document. The basic structure is:
+
+```java
+collection.updateOne(filter, update);
+```
+
+In the following example we are going to update the balance of an account. The account_id is the filter and the new balance is the update and account_status is going to be updated to active:
+
+```java
+public static void main(String[] args) {
+
+    String mongoConnectionString = "mongodb://localhost:27017";
+    try (MongoClient mongoClient = MongoClients.create(mongoConnectionString)) {
+        List<Document> databases = mongoClient.listDatabases().into(new ArrayList<>());
+        MongoDatabase database = mongoClient.getDatabase("bank");
+        MongoCollection<Document> collection = database.getCollection("accounts");
+        
+        Bson filter = Filters.eq("account_id", "MDB1001");
+        Bson update = Updates.combine(Updates.inc("balance", 6000.00), Updates.set("account_status", "active"));
+        
+        UpdateResult updateResult = collection.updateOne(filter, update);
+        
+
+    }
+}
+```
+
+Regarding arrays there are several operations: Updates.push(), Updates.pull(), Updates.addToSet(), Updates.pop(), Updates.pullAll(), Updates.pushEach(). The `push()` method is used to add an element to an array field. The basic structure is:
+
+```java
+collection.updateOne(filter, Updates.push("diet", "vegan"));
+```
+
+To access to a specific position in the array we should use the `$` operator. The `$` operator is used to update the first element that matches the query. The basic structure is:
+
+```java
+collection.updateOne(filter, Updates.set("diet.$", "vegan"));
+```
+
+Regarding update many operation, there is a method called `updateMany()` which is used to update multiple documents in a collection. The basic structure is:
+
+```java
+collection.updateMany(filter, update);
+```
+
+In the following example we are going to set a minimum balance for all accounts of type savings:
+
+```java
+public static void main(String[] args) {
+
+    String mongoConnectionString = "mongodb://localhost:27017";
+    try (MongoClient mongoClient = MongoClients.create(mongoConnectionString)) {
+        List<Document> databases = mongoClient.listDatabases().into(new ArrayList<>());
+        MongoDatabase database = mongoClient.getDatabase("bank");
+        MongoCollection<Document> collection = database.getCollection("accounts");
+        
+        Bson filter = Filters.eq("account_type", "savings");
+        Bson update = Updates.combine(Updates.set("balance", 1000.00));
+        
+        UpdateResult updateResult = collection.updateMany(filter, update);
+        
+
+    }
+}
+``` 
+
+## Lesson 5: Deleting Documents in Java Applications
+
 TBC
