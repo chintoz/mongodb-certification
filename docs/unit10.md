@@ -90,3 +90,69 @@ public static void main(String[] args) {
     }
 }
 ```
+
+## Lesson 3: Querying a MongoDB Collection in Java Applications
+
+There are couple of method to find documents in a collection. The `find()` method is used to find all documents in a collection. The basic structure is:
+
+```java
+public static void main(String[] args) {
+    
+    String mongoConnectionString = "mongodb://localhost:27017";
+    try (MongoClient mongoClient = MongoClients.create(mongoConnectionString)) {
+        List<Document> databases = mongoClient.listDatabases().into(new ArrayList<>());    
+        MongoDatabase database = mongoClient.getDatabase("bank");
+        MongoCollection<Document> collection = database.getCollection("accounts");
+
+        Bson filters = Filters.and(Filters.gte("balance", 1000), Filters.eq("account_type", "checking"));
+        FindIterable<Document> documents = collection.find(filters);
+        documents.forEach(doc -> System.out.println(doc.toJson()));
+    }
+}
+```
+
+We can use an iterator to iterate across the results. In the following example is used a try with resources to ensure the resources are closed after the iteration:
+
+```java
+public static void main(String[] args) {
+    
+    String mongoConnectionString = "mongodb://localhost:27017";
+    try (MongoClient mongoClient = MongoClients.create(mongoConnectionString)) {
+        List<Document> databases = mongoClient.listDatabases().into(new ArrayList<>());    
+        MongoDatabase database = mongoClient.getDatabase("bank");
+        MongoCollection<Document> collection = database.getCollection("accounts");
+
+        Bson filters = Filters.and(Filters.gte("balance", 1000), Filters.eq("account_type", "checking"));
+        try (MongoCursor<Document> cursor = collection.find(filters).iterator()) {
+            while (cursor.hasNext()) {
+                Document document = cursor.next();
+                System.out.println(document.toJson());
+            }
+        }
+    }
+}
+```
+
+In certain cases we could want to return only a single document. The `find()` method returns a `FindIterable` object. The `first()` method is used to return the first document in the collection. The basic structure is:
+
+```java
+public static void main(String[] args) {
+    
+    String mongoConnectionString = "mongodb://localhost:27017";
+    try (MongoClient mongoClient = MongoClients.create(mongoConnectionString)) {
+        List<Document> databases = mongoClient.listDatabases().into(new ArrayList<>());    
+        MongoDatabase database = mongoClient.getDatabase("bank");
+        MongoCollection<Document> collection = database.getCollection("accounts");
+
+        Bson filters = Filters.and(Filters.gte("balance", 1000), Filters.eq("account_type", "checking"));
+        Document document = collection.find(filters).first();
+        System.out.println(document.toJson());
+    }
+}
+```
+
+All query should provide filters to prevent retrieving all the document from a collection. It's going to improve the performance of the query. It's going to reduce the amount of data transferred between the database and the application. It's going to reduce the amount of memory used by the application.
+
+## Lesson 4: Updating Documents in Java Applications
+
+TBC
