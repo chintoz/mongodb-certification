@@ -227,4 +227,74 @@ public static void main(String[] args) {
 
 ## Lesson 5: Deleting Documents in Java Applications
 
+Regarding delete operations, there are a couple of methods to be used in order to delete documents. The `deleteOne()` method is used to delete a single document in a collection. The `deleteMany()` method is used to delete multiple documents in a collection.
+
+`deleteOne()` method is used to delete a single document in a collection when it matches a specific criteria. This method accepts a query filter. The basic structure is:
+
+```java
+collection.deleteOne(filter);
+```
+
+It returns an object of type `DeleteResult`. The `getDeletedCount()` method is used to get the number of documents deleted. The basic structure is:
+
+```java
+DeleteResult deleteResult = collection.deleteOne(filter);
+System.out.println("Deleted documents: " + deleteResult.getDeletedCount());
+```
+
+Here a full example relate with accounts collection, and delete the document for a account holder called John Doe:
+
+```java
+public static void main(String[] args) {
+
+    String mongoConnectionString = "mongodb://localhost:27017";
+    try (MongoClient mongoClient = MongoClients.create(mongoConnectionString)) {
+        List<Document> databases = mongoClient.listDatabases().into(new ArrayList<>());
+        MongoDatabase database = mongoClient.getDatabase("bank");
+        MongoCollection<Document> collection = database.getCollection("accounts");
+        
+        Bson filter = Filters.eq("account_holder", "John Doe");
+        DeleteResult deleteResult = collection.deleteOne(filter);
+        System.out.println("Deleted documents: " + deleteResult.getDeletedCount());
+    }
+}
+```
+
+If the `deleteOne()` operation is launched without filter, it's going to delete the first document in the collection. It's a good practice to provide a filter to prevent deleting all the documents in a collection.
+
+`deleteMany()` method is used to delete multiple documents in a collection when it matches a specific criteria. This method accepts a query filter. The basic structure is:
+
+```java
+collection.deleteMany(filter);
+```
+
+It returns an object of type `DeleteResult`. The `getDeletedCount()` method is used to get the number of documents deleted. The basic structure is:
+
+```java
+DeleteResult deleteResult = collection.deleteMany(filter);
+System.out.println("Deleted documents: " + deleteResult.getDeletedCount());
+```
+
+Here a concrete example deleting all the accounts with the status dormant:
+    
+```java 
+public static void main(String[] args) {
+
+    String mongoConnectionString = "mongodb://localhost:27017";
+    try (MongoClient mongoClient = MongoClients.create(mongoConnectionString)) {
+        List<Document> databases = mongoClient.listDatabases().into(new ArrayList<>());
+        MongoDatabase database = mongoClient.getDatabase("bank");
+        MongoCollection<Document> collection = database.getCollection("accounts");
+        
+        Bson filter = Filters.eq("account_status", "dormant");
+        DeleteResult deleteResult = collection.deleteMany(filter);
+        System.out.println("Deleted documents: " + deleteResult.getDeletedCount());
+    }
+}
+```
+
+`deleteMany()` without any filter is going to delete all the documents in the collection. It's a good practice to provide a filter to prevent deleting all the documents in a collection.
+
+## Lesson 6: Creating MongoDB Transactions in Java Applications
+
 TBC
