@@ -12,7 +12,7 @@ In mongo Atlas there is aa UI to adding stages to a pipeline one by one. In orde
 
 Basic structure for aggregation is:
 
-```json
+```mongodb-json
 db.collection.aggregate([
   { $stage_name: {<expression>} },
   { $stage_name: {<expression>} },
@@ -30,7 +30,7 @@ The syntax for each stage depends on the stage itself. Documentation is the sour
 
 Sometimes in stages fields are prefixed with a `$` sign. This is a way to reference fields in the documents. For example:
 
-```json
+```mongodb-json
 $set: { defaultUserName: {
     $concat: ["$first_name", " ", "$last_name"]}
 }
@@ -42,7 +42,7 @@ We will use `$match` to filter for documents that satisfy a query. We will use `
 
 `$match` stage is used to filter documents that match a specific criteria. It receives one argument which is the query. Here an example based on zip codes from California: 
 
-```json
+```mongodb-json
 db.zips.aggregate([
   { $match: { state: "CA" } }
 ])
@@ -52,7 +52,7 @@ This example works as a simple query. When we have `$match` stage, try to use it
 
 `$group` stage is used to group documents based on a group key. The output is one document for each unique value of the group key. The basic structure of this stage is:
 
-```json
+```mongodb-json
 $group: {
   _id: <expression>, // Group key
   <field1>: { <accumulator1>: <expression1> },
@@ -76,7 +76,7 @@ Accumulators are operators that perform operations on the grouped data. The most
 
 For example, based on the zip codes collection, we want to group by city and count the amount of zip codes in each city:
 
-```json 
+```mongodb-json 
 db.zips.aggregate([
   { $group: { _id: "$city", totalZips: { $count: {} } } }
 ])
@@ -84,7 +84,7 @@ db.zips.aggregate([
 
 Making both operators working together, in the following example we are going to filter for zip codes in California and group by city:
 
-```json
+```mongodb-json
 db.zips.aggregate([
   { $match: { state: "CA" } },
   { $group: { _id: "$city", totalZips: { $count: {} } } }
@@ -97,7 +97,7 @@ db.zips.aggregate([
 
 `$sort` stage is used to sort all input documents and passes them through pipeline in sorted order. The basic structure of this stage is:
 
-```json
+```mongodb-json
 db.collection.aggregate([
   { $sort: { field1: 1, field2: -1 } }
 ])
@@ -107,7 +107,7 @@ The value of 1 means ascending order and -1 means descending order. The values a
 
 Here an example about zip codes collection. In the following example zip codes are going to be sorted by population in descending order:
 
-```json
+```mongodb-json
 db.zips.aggregate([
   { $sort: { pop: -1 } }
 ])
@@ -115,7 +115,7 @@ db.zips.aggregate([
 
 `$limit` stage is used to limit the number of documents that pass through the next aggregation stage. The basic structure of this stage is:
 
-```json
+```mongodb-json
 db.collection.aggregate([
   {
     "$limit": <number_items>
@@ -125,7 +125,7 @@ db.collection.aggregate([
 
 It has only a positive integer value which means the amount of documents to retain. Based on the previous example about population, we are going to display the top 5 zip codes by population:
 
-```json
+```mongodb-json
 db.zips.aggregate([
   { $sort: { pop: -1 } },
   { $limit: 5 }
@@ -138,7 +138,7 @@ It's important to take into consideration that stages order is super important. 
 
 `$project` determines output shape of documents. It can be used to include, exclude, rename, or add fields. It's similar to projection done in `find()` method. It should be the last stage to format the output in the pipeline. The basic structure of this stage is:
 
-```json
+```mongodb-json
 db.collection.aggregate([
   {
     "$project": {
@@ -152,7 +152,7 @@ db.collection.aggregate([
 
 The value of 1 means to include the field and 0 means to exclude the field. There is a way to provide a value to a new field using an expression. For example, to add a new field with the sum of two fields:
 
-```json
+```mongodb-json
 db.zips.aggregate([
   {
     "$project": {
@@ -173,7 +173,7 @@ db.zips.aggregate([
 
 `$set` stage adds or modifies fields in the pipeline. Useful when we want to change existing fields in pipeline or add new ones to be used in upcoming stages. The basic structure of this stage is:
 
-```json
+```mongodb-json
 db.collection.aggregate([
   {
     "$set": {
@@ -187,7 +187,7 @@ db.collection.aggregate([
 
 For example, using the zip codes collection, we are going to add a new field about estimated population on 2030, multiplying the current population by 1.0031:
 
-```json
+```mongodb-json
 db.zips.aggregate([
   {
     "$set": {
@@ -201,7 +201,7 @@ In this case, we have a new field called `pop_2030` with the estimated populatio
 
 Last stage is `$count` which counts the number of documents that pass through the stage. It returns the total documents count. The basic structure of this stage is:
 
-```json
+```mongodb-json
 db.collection.aggregate([
   {
     "$count": "field_name"
@@ -211,7 +211,7 @@ db.collection.aggregate([
 
 For example we want to count the amount of zip codes in the database:
 
-```json
+```mongodb-json
 db.zips.aggregate([
   {
     "$count": "total_zips"
@@ -222,7 +222,7 @@ It returns a single document with the total amount of zip codes in the collectio
 
 Here a last example regarding a birds collection, filter them by species and between specific dates viewed:
 
-```json
+```mongodb-json
 db.sightings.aggregate([
     {$match: {"species_common": "Eastern Bluebird", date: {$gte: ISODate('2022-01-01T00:00:00.000Z'), $lt: ISODate('2023-01-01T00:00:00.000Z') }}},
     {$count: "sightings"}
@@ -231,7 +231,56 @@ db.sightings.aggregate([
 
 ## Lesson 5: Using the $out Stage in a MongoDB Aggregation Pipeline
 
-TBC
+`$out` stage writes the resulting documents of the aggregation pipeline to a new collection. It's useful when we want to store the results of the aggregation pipeline in a new collection. It must be the last stage in the pipeline. It creates a new collection if it doesn't already exist. If collection exists, `$out` replaces the existing collection with new data. We have to be careful with this operation to prevent replacing data. The basic structure of this stage is:
+
+```mongodb-json
+db.collection.aggregate([
+  {
+    "$out": {
+        db: "database_name",
+        coll: "collection_name"
+    }
+  }
+])
+```
+
+Another way to express it is:
+
+```mongodb-json
+db.collection.aggregate([
+  {
+    "$out": "database_name.collection_name"
+  }
+])
+```
+
+Or even:
+
+```mongodb-json
+db.collection.aggregate([
+  {
+    "$out": "collection_name"
+  }
+])
+```
+
+Here an example about zip codes collection. It groups documents by state, and as aggregator is using sum operator on population field. After that, a filter is executed to get only states with a population greater than 10 million. Finally, the result is stored in a new collection called `states_population`:
+
+```mongodb-json
+db.zips.aggregate([
+  { $group: { _id: "$state", total_pop: { $sum: "$pop" } } },
+  { $match: { total_pop: { $gte: 10000000 } } },
+  { $out: "states_population" }
+])
+```
+
+After that we can do queries over the new collection `states_population` to get the results.
+
+```mongodb-json
+db.states_population.find()
+```
+
+In the documentation are more aggregation stages not explained in this unit. It's important to read the documentation to get a deeper knowledge about aggregation stages and how to use them.
 
 
 
