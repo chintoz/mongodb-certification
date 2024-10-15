@@ -33,3 +33,6 @@
 <li class="masthead__menu-item">
     <a href="/mongodb-certification/unit11.html">Unit 11 - MongoDB Aggregation</a>
 </li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit12.html">Unit 12 - MongoDB Aggregation with Java</a>
+</li>
