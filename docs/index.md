@@ -36,3 +36,6 @@
 <li class="masthead__menu-item">
     <a href="/mongodb-certification/unit12.html">Unit 12 - MongoDB Aggregation with Java</a>
 </li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit13.html">Unit 13 - MongoDB Indexes</a>
+</li>
