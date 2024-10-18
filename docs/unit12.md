@@ -46,3 +46,43 @@ public class Sample {
     
 }
 ```
+
+## Lesson 3: Using MongoDB Aggregation Stages with Java: $sort and $project
+
+In the sane way as the previous lesson, we are going to use Aggregates builder to define the stages with `$sort` and `$project` operations.
+
+`$sort` sorts all input documents. Value 1 means ascending order. Value -1 means descending order.
+
+`$project` determines output shape of documents. It can be used to include, exclude, rename, or add fields. It should be the last stage to format the output in the pipeline.
+
+In the following example we are going to find all checking accounts with balance greater than 1500, sort the result in descending order. It's going to return only the original balance, euro balance, account type and account id fields. It's going to be assumed balance is in dolar and euro balance is going to be calculated a ratio 1 euro is 1.2 dollars.
+
+```java
+public class Sample {
+    public static void main(String[] args) {
+        String connectionString = "mongodb://localhost:27017";
+        try (MongoClient mongoClient = MongoClients.create(connectionString)) {
+            MongoDatabase database = mongoClient.getDatabase("bank");
+            MongoCollection<Document> accounts = database.getCollection("accounts");
+            matchSortAndProjectStages(accounts);
+        }
+    }
+
+    private static void matchSortAndProjectStages(MongoCollection<Document> accounts) {
+        Bson matchStage = Aggregates.match(Filters.and(
+                Filters.eq("account_type", "checking"),
+                Filters.gt("balance", 1500)
+        ));
+        Bson sortStage = Aggregates.sort(Sorts.orderBy(Sorts.descending("balance")));
+        Bson projectStage = Aggregates.project(
+                Projections.fields(
+                        Projections.include("balance", "account_type", "account_id"),
+                        Projections.computed("euro_balance", new Document("$divide", Arrays.asList("$balance", 1.2))),
+                        Projections.excludeId()
+                )
+        );
+        System.out.println("Displaying aggregation results:");
+        accounts.aggregate(Arrays.asList(matchStage, sortStage, projectStage)).forEach(doc -> System.out.println(doc.toJson()));
+    }
+}
+```
