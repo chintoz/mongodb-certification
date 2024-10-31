@@ -219,7 +219,29 @@ When a query is executed and no index available for it, COLLECTION SCAN is used.
 
 ## Lesson 3: Creating a Multikey Index in MongoDB
 
-TBC
+When we define an index on an array field, MongoDB creates a multikey index. Multikey indexes are used to index arrays. Each array entry has a corresponding index entry. Multikey indexes are used to query arrays. It can be a single field or compound index. The following examples based on customers collection with accounts field as an array are considered multikey indexes even when they are single or compound indexes:
+
+```mongodb-json
+db.customers.createIndex({ accounts: 1 })
+```
+
+```mongodb-json
+db.customers.createIndex({ accounts: 1, email: 1 })
+```
+
+There is a limitation about one array field per index. The following example is not allowed if emails field is an array too:
+
+```mongodb-json
+db.customers.createIndex({ accounts: 1, emails: 1 })
+```
+
+Internally MongoDB creates an index entry for each element in the array. In the following example we are going to create an index on customers collection in the field accounts:
+
+```mongodb-json
+db.customers.createIndex({ accounts: 1 })
+```
+
+The outcome from that command will display index name, in this case it'll be `accounts_1`. 
 
 ## Lesson 4: Working with Compound Indexes in MongoDB
 
