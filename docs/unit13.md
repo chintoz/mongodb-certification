@@ -245,8 +245,96 @@ The outcome from that command will display index name, in this case it'll be `ac
 
 ## Lesson 4: Working with Compound Indexes in MongoDB
 
-TBC
+A compound index is an index on multiple fields. Can be a multikey index if it includes an array field with the limitation of one array field per index. This kind of indexes support queries that match on the prefix of index fields. The following example creates a compound index on the `birthdate` descendant, `active` and `name` fields in the `customers` collection:
+
+```mongodb-json
+db.customers.createIndex({ active: 1, birthdate: -1, name: 1 })
+```
+
+The following examples will show queries that can use the compound index created:
+
+```mongodb-json
+db.customers.find({active: true}).sort({birthdate: -1})
+```
+
+```mongodb-json
+db.customers.find({ birthdate: { $lt: ISODate("1995-08-01") }, active: true })
+```
+
+And the following examples won't use the index because the are not starting from `active` field:
+
+```mongodb-json
+db.customers.find({ birthdate: { $lt: ISODate("1995-08-01") }})
+```
+
+```mongodb-json
+db.customers.find({}).sort({birthdate: 1})
+```
+
+Compound indexes are ordered structures. The order of the fields in the index is important. The order of the fields in the index should match the order of the fields in the query. The way to define a compound index, and how to sort the fields should take into consideration this: Equality, Sort, Range fields. Appart from the order of the fields in term or sorting matter, sort order is important too. The sort order should match the sort order in the query.
+
+### Equality, Sort, Range Fields
+
+Equality test exact matches on single fields. Those fields should be placed first in the compound index. It reduces the query processing times, and it retrieves fewer documents. For instance:
+
+```mongodb-json
+findOne({active:true})
+find({birthdate: ISODate("1995-08-01")})
+```
+
+Sort determines the order of results. Index sort eliminates the need for in-memory sorting. It should be placed after equality fields. Sort order is important if query results are sorted by more than 1 field and they mix sort orders (ascending and descending order). For instance:
+
+```mongodb-json
+sort({name: -1})
+sort({birthdate: -1})
+sort({name: -1, birthdate: 1})
+```
+
+Range field are queries based on a range of values. They should be placed after equality and sort fields to reduce in memory sort. It reduces the number of documents to scan. For instance:
+
+```mongodb-json
+find({birthdate: { $gt: ISODate("1995-08-01"), $lt: ISODate("1995-08-31") }})
+```
+
+Sometimes it could be considered adding additional fields for projection. It'll prevent doing document fetching because index could satisfy query results. If we add this kind of fields in order to improve projection performance, they should be placed after range fields.
+
 
 ## Lesson 5: Deleting MongoDB Indexes
 
-TBC
+It's recommended indexes to improve performance. However, it implies a write cost. Too many indexes in a collection can affect system performance. We should delete unused indexes to improve it. Deleting an index that's the only index supporting a query will affect the performance on the query. Then we have to make sure the index is not used before deleting it.
+
+Recreating an index takes time an resources. It's better to disable an index than deleting it. We can disable an index using the `hideIndex()` method. The method has the following syntax:
+
+```mongodb-json
+db.collection.hideIndex("index_name")
+```
+
+It could receive as parameter index definition (the JSON used to define the index) or index name.
+
+It hides the index but continues updating its keys. Try to group the indexes to reduce the number of redundant indexes. For example those queries:
+
+```mongodb-json
+find({username: "johndoe"})
+find({username: "johndoe", active: true})
+```
+We can create two different indexes `username_1` and `username_1_active_1`. The first one could be redundant because the query could use the second one. We can hide the first one and keep the second one.
+
+The operation to delete and index is the `dropIndex()` method. The method has the following syntax:
+
+```mongodb-json
+db.collection.dropIndex("index_name")
+```
+
+It could receive as parameter index definition (the JSON used to define the index) or index name.
+
+We can also delete indexes from de Atlas UI. There is a button to Drop Index in the index list for a collection.
+
+Apart from that command to delete one specific index, we can delete all indexes in a collection using the `dropIndexes()` method. The method has the following syntax:
+
+```mongodb-json
+db.collection.dropIndexes()
+db.collection.dropIndexes('index_name')
+db.collection.dropIndexes(['index_name1', 'index_name2'])
+```
+
+It's going to delete all indexes except _id index. This command would support and index as parameter or an array of indexes to be deleted.
