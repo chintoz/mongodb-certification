@@ -81,11 +81,149 @@ print(result)
 ```
 ## Lesson 3: Creating a Search Index with Static Field Mapping
 
-TBC
+If we have huge amount of fields, and we know some of them are not relevant for the search index, we can use static mapping to specify which fields are going to be indexed. It's called static indexing, it means the fields being queried are always the same.
+
+It's going to minimize the query workload because the number of fields indexed and the amount of data to scan is minimal.
+
+During the video a static field index created on some of the field from birds colletion.
+
+```mongodb-json
+{
+  "name": "sample_analytics-birds-static",
+  "searchAnalyzer": "lucene.standard",
+  "analyzer": "lucene.standard",
+  "collectionName": "birds",
+  "database": "sample_analytics",
+  "mappings": {
+    "dynamic": false,
+    "fields": {
+      "common_name": {
+        "type": "string"
+      },
+      "diet": {
+        "type": "string"
+      },
+      "habitat": {
+        "type": "string"
+      },
+      "scientific_name": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
+
+During the lab this index was created using this command:
+
+```mongodb-json
+{
+    "name": "sample_supplies-sales-static",
+    "searchAnalyzer": "lucene.standard",
+    "analyzer": "lucene.standard",
+    "collectionName": "sales",
+    "database": "sample_supplies",
+    "mappings": {
+        "dynamic": false,
+        "fields": {
+            "storeLocation": {
+                "type": "string"
+            }
+        }
+    }
+}
+```
+
+And it was launched with the commands to create index and query via search index similar to the previous lesson.
+
+A second part of the lab encourage to create a search pipeline using the search index:
+
+```mongodb-json
+db.sales.aggregate([
+{
+  "$search": {
+    index: "sample_supplies-sales-static",
+    text: {
+      query: "London", 
+      path: { "wildcard": "*" }
+    } } },
+{
+  "$set": {
+    score: { 
+      "$meta": "searchScore" }
+    }
+}
+])
+```
 
 ## Lesson 4: Using $search and Compound Operators
 
-TBC
+Atlas includes a built in tool to test basic operations on search indexes. To add customizations we need to create a `$search` stage in the aggregation pipeline. We can use our Java language to create our pipeline using this search stage.
+
+In the search stage there are several options to customize the search. This is the structure of the search stage:
+
+```mongodb-json
+{
+  "$search": {
+    "index": "indexName",
+    "operatorName" | "collectorName" : {
+      operatorSpecification | collectorSpecification
+    },
+    highlight: {
+        highlightOptions
+    },
+    count: {
+        countOptions
+    },
+    returnStoredSources:  true | false,
+  }
+}
+```
+
+We can configure the index to use, options about how much text to return with the search terms (highlight section), number of total documents (count section), if we want to return the stored sources and `$compound` operators described in operatorName or collectorName.
+
+The `$compound` operator is nested in search stage. Their clauses are:
+
+* must: all clauses must match
+* must not: all clauses must not match
+* should: which will assign weights to records that match the clause
+* filter: which will filter the results based on the clause. It will eliminate documents which don't match the clause, but it won't affect the score.
+
+We are going to do an example based on the birds collection, with those conditions: live in grasslands, and should have large wingspan.
+
+```mongodb-json
+[
+  {
+    $search: {
+      compound: {
+        must: [
+          {
+            text: {
+              query: "grassland",
+              path: "habitat",
+            },
+          },
+        ],
+        should: [
+          {
+            range: {
+              gte: 75,
+              path: "wingspam:_cm",
+              score: {
+                constant: {
+                  value: 5,
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+]
+```
+
+In this case it's filtering those birds that live in grasslands, and it prioritizes those with large wingspan adding 5 points to the score of the document. 
 
 ## Lesson 5: Group Search Results by Using Facets
 
