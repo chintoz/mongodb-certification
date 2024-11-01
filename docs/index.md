@@ -39,3 +39,6 @@
 <li class="masthead__menu-item">
     <a href="/mongodb-certification/unit13.html">Unit 13 - MongoDB Indexes</a>
 </li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit14.html">Unit 14 - MongoDB Atlas Search</a>
+</li>
