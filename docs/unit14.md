@@ -223,9 +223,162 @@ We are going to do an example based on the birds collection, with those conditio
 ]
 ```
 
-In this case it's filtering those birds that live in grasslands, and it prioritizes those with large wingspan adding 5 points to the score of the document. 
+In this case it's filtering those birds that live in grasslands, and it prioritizes those with large wingspan adding 5 points to the score of the document.
+
+Based on the lab this is a concrete example using filter and should:
+    
+```mongodb-json
+db.sales.aggregate([
+  {
+    $search: {
+      index: 'sample_supplies-sales-dynamic',
+      "compound": {
+        "filter": [
+          {
+            "text": {
+              "query": "Online",
+              "path": "purchaseMethod"
+            }
+          }
+        ],
+        "should": [
+          {
+            "text": {
+              "query": "notepad",
+              "path": "items.name",
+              "score": { "constant": { "value": 5 } }
+            }
+          }
+      ]
+      }
+    }
+  },
+  {
+    $project: {
+    "items.name": 1,
+    "purchaseMethod": 1,
+    "score": { $meta: "searchScore" }
+    }
+  }
+])
+```
+
 
 ## Lesson 5: Group Search Results by Using Facets
 
-TBC
+Facets are buckets that we group our search results into. At the end we are creating categories for our search results. We can use facets to group our search results by a field or by a range of values.
+
+The data types to be consider for facets are: numbers, dates and strings. When we create the index with dynamic mapping, we could select data type like DateFacet, RangeFacet or StringFacet.
+
+To query by those fields, we will use $searchMeta operator. This operator will return the facets and the count of the documents that match the search query. It allows us to see the facets and how many results are in each bucket.
+
+The buckets that the search will be filtered into are not part of the search results themselves, they are part of the search metadata. The search metadata is returned in the search results. This is information about how the search was carried out.
+
+There are two pieces of metadata returned by atlas search: the facets, and the count which is the number of results in each of the facets.
+
+Here an example
+    
+```mongodb-json
+db.sightings.aggregate([
+  {
+    $searchMeta: {
+      facet: {
+        operator: {
+          text: {
+            query: ["Northern Cardinal"],
+            path: "common_name"
+          }
+        },
+        facets: {
+          sightingWeekFacet: {
+            type: "date",
+            path: "sighting",
+            boundaries: [
+              ISODate("2022-01-01"), 
+              ISODate("2022-01-08"),
+              ISODate("2022-01-15"),
+              ISODate("2022-01-22")
+            ],
+            default: "other"
+          }
+        }
+      }
+    }
+  }
+])
+```
+
+In this lab is going to be shown how to create a search index with static mapping (search_index.json).
+
+```mongodb-json
+{
+    "name": "sample_supplies-sales-facets",
+    "searchAnalyzer": "lucene.standard",
+    "analyzer": "lucene.standard",
+    "collectionName": "sales",
+    "database": "sample_supplies",
+    "mappings": {
+        "dynamic": true,
+        "fields": {
+        "purchaseMethod": [
+            {
+            "dynamic": true,
+            "type": "document"
+            },
+            {
+            "type": "string"
+            }
+        ],
+        "storeLocation": [
+            {
+            "dynamic": true,
+            "type": "document"
+            },
+            {
+            "type": "stringFacet"
+            }
+        ]
+        }
+    }
+}
+```
+Command to create a search index via CLI:
+
+```bash
+atlas clusters search indexes create --clusterName myAtlasClusterEDU -f /app/search_index.json
+```
+
+Listing existing indexes
+
+```bash
+atlas clusters search indexes list --clusterName myAtlasClusterEDU --db sample_supplies --collection sales
+```
+
+Last lab exercise about a query using facets:
+
+```mongodb-json
+db.sales.aggregate([
+  {
+    $searchMeta: {
+      index: 'sample_supplies-sales-facets',
+        "facet": {
+            "operator": {
+                "text": {
+                    "query": "In store",
+                    "path": "purchaseMethod"
+                }
+            },
+            "facets": {
+                "locationFacet": {
+                    "type": "string",
+                    "path": "storeLocation",
+                }
+            }
+        }
+    }
+  }
+])
+```
+
+In summary facet is the similar operator in queries for grouping, however in Atlas search engine we cannot use it, and we need to use $searchMeta operator to get the facets and the count of the documents that match the search query.
 
