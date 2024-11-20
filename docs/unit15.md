@@ -25,5 +25,33 @@ In order to do a multi-document transaction, MongoDB "locks" resources involved 
 
 ## Lesson 3: Using Transactions in MongoDB
 
-TBC
+First step is open a session. A session is used to group database operations that are related to each other and should be run together, similar to a transaction. A transaction has a maximum runtime of less than one minute after the first write. 
+
+If we receive this kind of error: ```MongoServerError: Transaction 1 has been aborted ```, most likely, it'll be related with transaction timeout.
+
+Steps: 
+
+1. Create a session
+2. Start a transaction. This operation doesn't show any output. It's normal.
+3. Creating a constant to point to the account collection
+4. Write first document decreasing balance
+5. Write second document increasing balance
+6. Commit the transaction. Both changes will be applied to the database.
+
+```javascript
+const session = db.getMongo().startSession();
+session.startTransaction();
+const account = session.getDatabase('bank').getCollection('account');
+account.updateOne({account_id: 'MDB740740'}, {$inc: {balance: -30}});
+account.updateOne({account_id: 'MDB987654'}, {$inc: {balance: 30}});
+session.commitTransaction();
+```
+
+In case we don't want to commit the transaction we could roll back the transaction. This operation won't show any output. 
+
+```javascript 
+session.abortTransaction();
+```
+
+`commitTransaction` command is the only one showing output message about its completition. `startTransaction` and `abortTransaction` won't show any output.
 
