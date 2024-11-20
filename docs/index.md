@@ -45,3 +45,9 @@
 <li class="masthead__menu-item">
     <a href="/mongodb-certification/unit15.html">Unit 15 - MongoDB Transactions</a>
 </li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit16.html">Unit 16 - MongoDB Compass</a>
+</li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit17.html">Unit 17 - Spring Data and MongoDB</a>
+</li>
