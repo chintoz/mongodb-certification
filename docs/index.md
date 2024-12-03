@@ -51,3 +51,6 @@
 <li class="masthead__menu-item">
     <a href="/mongodb-certification/unit17.html">Unit 17 - Spring Data and MongoDB</a>
 </li>
+<li class="masthead__menu-item">
+    <a href="/mongodb-certification/unit18.html">Unit 18 - MongoDB VS Code Extension</a>
+</li>
